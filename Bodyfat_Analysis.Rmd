@@ -1,0 +1,66 @@
+---
+title: "Body Fat Analysis"
+author: "Marwan Lloyd"
+date: '2022-10-07'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(car)
+#setWD for wherever bodyfat csv is on machine 
+setwd("~/Desktop/UW-Madison/Stat 628/Module 2 Starter Materials")
+body_fat <- read.csv("BodyFat.csv")
+```
+
+```{r}
+sort(unique(body_fat$BODYFAT)) # <- from this we see some body fat numbers make no sense
+```
+
+```{r}
+#remove ID column remove density column, and remove adiposity as that's weight/height and keeping it could lead to multicollinearity issues
+adjusted_body_fat <- body_fat[c(2,4,5,6,8:17)]
+
+adjusted_body_fat_lm <- lm(adjusted_body_fat$BODYFAT ~ . , adjusted_body_fat)
+summary(adjusted_body_fat_lm)
+```
+
+```{r}
+#Get VIF's
+# VIFs start at 1 and have no upper limit. A value of 1 indicates that there is no correlation between this independent variable and any others. VIFs between 1 and 5 suggest that there is a moderate correlation, but it is not severe enough to warrant corrective measures. VIFs greater than 5 represent critical levels of multicollinearity where the coefficients are poorly estimated, and the p-values are questionable.
+
+vif(adjusted_body_fat_lm)
+```
+
+```{r}
+#remove high p-value variables (higher than .2)
+#so  remove height, chest, knee, ankle, biceps
+#remaining variables are: age, weight, neck, abdomen, hip, thigh, forearm, wrist
+bf_2 <- adjusted_body_fat[c(1:3,5,7,8,9,13,14)]
+fit_2 <- lm(BODYFAT ~ . , bf_2)
+summary(fit_2)
+```
+
+```{r}
+#proposing models
+#for simplicity this model is good as it's only 3 variables that are easy to get 
+#Is better than just Age + Weight as it's R^2 is .3 higher 
+#R^2 is only .02 less than fit_2's R^2
+summary(lm(BODYFAT ~ AGE + WEIGHT + ABDOMEN, bf_2))
+```
+
+```{r}
+#proposing model 2 
+#simpler but loses a lot of accuracy by missing one variable
+summary(lm(BODYFAT ~ AGE + WEIGHT, bf_2))
+```
+
+```{r}
+#Model w/ 3 most statistically significant values but is less accurate than Age + weight + abdomen
+summary(lm(BODYFAT ~ FOREARM + WRIST + ABDOMEN, body_fat))
+```
+
+```{r}
+#proposing model 4
+#doesn't seem better than Age + weight + abdomen. Is less accurate and isn't much simpler 
+summary(lm(BODYFAT ~ WEIGHT + ABDOMEN, body_fat))
+```
