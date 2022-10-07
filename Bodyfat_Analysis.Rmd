@@ -10,6 +10,10 @@ library(car)
 #setWD for wherever bodyfat csv is on machine 
 setwd("~/Desktop/UW-Madison/Stat 628/Module 2 Starter Materials")
 body_fat <- read.csv("BodyFat.csv")
+#convert to KGs
+body_fat$WEIGHT <- (body_fat$WEIGHT/2.2)
+#convert to CMs
+body_fat$HEIGHT <- body_fat$HEIGHT * 2.54
 ```
 
 ```{r}
@@ -61,6 +65,8 @@ summary(lm(BODYFAT ~ FOREARM + WRIST + ABDOMEN, body_fat))
 
 ```{r}
 #proposing model 4
-#doesn't seem better than Age + weight + abdomen. Is less accurate and isn't much simpler 
-summary(lm(BODYFAT ~ WEIGHT + ABDOMEN, body_fat))
+#Seems like best
+#highest R^2 of proposed ones w/ .7187 
+#lower standard error than AGE + WEIGHT + ABDOMEN
+summary(lm(BODYFAT ~ WEIGHT + ABDOMEN, bf_2))
 ```
