@@ -70,3 +70,22 @@ summary(lm(BODYFAT ~ FOREARM + WRIST + ABDOMEN, body_fat))
 #lower standard error than AGE + WEIGHT + ABDOMEN
 summary(lm(BODYFAT ~ WEIGHT + ABDOMEN, bf_2))
 ```
+
+
+```{r}
+library(shiny)
+ui <- fluidPage(
+selectInput("stat_dropdown", "Select a Stat of interest", choices = colnames(body_fat)[3:17], multiple = FALSE),
+plotOutput("general_scatter")
+)
+
+server <- function(input, output) { 
+  output$general_scatter <-  renderPlot({ 
+  ggplot(body_fat,aes(input$stat_dropdown,BODYFAT))+geom_jitter(aes(x = input$stat_dropdown,y = BODYFAT, color = input$stat_dropdown, size = BODYFAT))
+})
+  }
+
+app <- shinyApp(ui, server)
+
+app
+```
