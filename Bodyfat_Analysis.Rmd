@@ -105,8 +105,8 @@ ui <-
                       plotOutput("general_scatter")
                       )),
              tabPanel("Model Calculator",
-                      tags$p("The model that our project decided to use was a multi-linear regression of bodyfat percentage on two variables: weight and abdomen circumfrence. The final equation (used in this calculator) determined for this regression was:"), tags$h3("Body Fat = -40.47 - .67*Weight + .91 * Abdomen"), tags$h4("---------------------------------------------------------"),
-                      sidebarLayout(sidebarPanel(numericInput("Weight", "Weight (in kg):", 0, min = 0, step = .1), numericInput("Abdomen", "Abdomen Circumfrence (in cm):", 0, min = 0, step = .1)),
+                      tags$p("The model that our project decided to use was a multi-linear regression of bodyfat percentage on two variables: weight and abdomen circumfrence. The final equation (used in this calculator) determined for this regression was:"), tags$h3("Body Fat % = -40.47 - .67*Weight + .91 * Abdomen"), tags$h4("---------------------------------------------------------"),
+                      sidebarLayout(sidebarPanel(numericInput("Weight", "Weight (in kg):", 0, min = 0, step = .01), numericInput("Abdomen", "Abdomen Circumfrence (in cm):", 0, min = 0, step = .01)),
                         mainPanel("Calculated Bodyfat:", textOutput("calculated_bodyfat"), tags$head(tags$style("#calculated_bodyfat{color: black;
                                  font-size: 20px;
                                  font-style: bold;
@@ -118,6 +118,22 @@ ui <-
 )
 
 server <- function(input, output) { 
+  
+  observeEvent(input$Weight,{
+    if(input$Weight < 0 || isTRUE(is.na(input$Weight)) ){ 
+      x <- 0}
+    else{
+      x <- input$Weight
+    }
+    updateNumericInput(getDefaultReactiveDomain(), "Weight", value = round(x,digits = 2))})
+  
+  observeEvent(input$Abdomen,{
+    if(input$Abdomen < 0 || isTRUE(is.na(input$Abdomen)) ){ 
+      y <- 0}
+    else{
+      y <- input$Abdomen
+    }
+    updateNumericInput(getDefaultReactiveDomain(), "Abdomen", value = round(y,digits = 2))})
   
   output$calculated_bodyfat <- renderText(paste(c(-40.47 - .673*input$Weight + .91 * input$Abdomen),"%"))
   
