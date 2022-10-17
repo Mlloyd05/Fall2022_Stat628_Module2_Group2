@@ -89,8 +89,6 @@ We use KMO to test how suited our data is for Factor Analysis.
 
 
 ```{r}
-library(car)
-body_fat <- read.csv("adjusted_bodyfat.csv")
 predictors<-body_fat[3:16]
 ```
 
