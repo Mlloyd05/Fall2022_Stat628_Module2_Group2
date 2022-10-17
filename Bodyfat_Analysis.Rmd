@@ -9,7 +9,7 @@ output: html_document
 library(car)
 #setWD for wherever bodyfat csv is on machine 
 setwd("~/Desktop/UW-Madison/Stat 628/Module 2 Starter Materials")
-body_fat <- read.csv("BodyFat.csv")
+body_fat <- read.csv("adjusted_bodyfat.csv")
 #convert to KGs
 body_fat$WEIGHT <- (body_fat$WEIGHT/2.2)
 #convert to CMs
@@ -22,7 +22,7 @@ sort(unique(body_fat$BODYFAT)) # <- from this we see some body fat numbers make 
 
 ```{r}
 #remove ID column remove density column, and remove adiposity as that's weight/height and keeping it could lead to multicollinearity issues
-adjusted_body_fat <- body_fat[c(2,4,5,6,8:17)]
+adjusted_body_fat <- body_fat[c(2,4,5,6,8:17),]
 
 adjusted_body_fat_lm <- lm(adjusted_body_fat$BODYFAT ~ . , adjusted_body_fat)
 summary(adjusted_body_fat_lm)
@@ -68,11 +68,11 @@ summary(lm(BODYFAT ~ FOREARM + WRIST + ABDOMEN, body_fat))
 #Seems like best
 #highest R^2 of proposed ones w/ .7187 
 #lower standard error than AGE + WEIGHT + ABDOMEN
-summary(lm(BODYFAT ~ WEIGHT + ABDOMEN, bf_2))
+summary(lm(BODYFAT ~ WEIGHT + ABDOMEN, body_fat))
 ```
 
 
-```{r}
+```{r FIRST GO}
 library(shiny)
 ui <- fluidPage(
 selectInput("stat_dropdown", "Select a Stat of interest", choices = colnames(body_fat)[3:17], multiple = FALSE),
@@ -81,11 +81,86 @@ plotOutput("general_scatter")
 
 server <- function(input, output) { 
   output$general_scatter <-  renderPlot({ 
-  ggplot(body_fat,aes(input$stat_dropdown,BODYFAT))+geom_jitter(aes(x = input$stat_dropdown,y = BODYFAT, color = input$stat_dropdown, size = BODYFAT))
+  ggplot(body_fat,aes(input$stat_dropdown,BODYFAT)) + 
+      labs(x = input$stat_dropdown, y = "Body Fat", title = "Body Fat Scatterplot") +
+     geom_jitter(aes(x = input$stat_dropdown,y = BODYFAT, color = input$stat_dropdown, size = BODYFAT))
 })
   }
 
 app <- shinyApp(ui, server)
 
 app
+```
+
+
+```{r REAL TRY}
+library(shiny)
+library(shinythemes)
+
+ui <- 
+  navbarPage("Group 2 Shiny", collapsible = TRUE, inverse = TRUE, theme = shinytheme("spacelab"),
+             tabPanel("All Stat Scatterplots",
+                      fluidPage(
+                      selectInput("stat_dropdown", "Select a Stat of Interest", choices = colnames(body_fat)[3:17], multiple = FALSE),
+                      plotOutput("general_scatter")
+                      )),
+             tabPanel("Model Calculator",
+                      tags$p("The model that our project decided to use was a multi-linear regression of bodyfat percentage on two variables: weight and abdomen circumfrence. The final equation (used in this calculator) determined for this regression was:"), tags$h3("Body Fat = -40.47 - .67*Weight + .91 * Abdomen"), tags$h4("---------------------------------------------------------"),
+                      sidebarLayout(sidebarPanel(numericInput("Weight", "Weight (in kg):", 0, min = 0, step = .1), numericInput("Abdomen", "Abdomen Circumfrence (in cm):", 0, min = 0, step = .1)),
+                        mainPanel("Calculated Bodyfat:", textOutput("calculated_bodyfat"), tags$head(tags$style("#calculated_bodyfat{color: black;
+                                 font-size: 20px;
+                                 font-style: bold;
+                                 }"
+                         )
+              )))
+                      ),
+             tabPanel("About", tags$p("This shiny app is maintained by Marwan Lloyd '23. For any questions, concerns, or feedback please reach out him at either of the below emails:"), tags$address("Marwan.Lloyd@Wisc.edu"), tags$address("Melloyd2@Wisc.edu"))
+)
+
+server <- function(input, output) { 
+  
+  output$calculated_bodyfat <- renderText(paste(c(-40.47 - .673*input$Weight + .91 * input$Abdomen),"%"))
+  
+  output$general_scatter <-  renderPlot({ 
+  ggplot(body_fat,aes(input$stat_dropdown,BODYFAT)) + 
+      labs(x = input$stat_dropdown, y = "Body Fat", title = "Body Fat Scatterplot") +
+     geom_jitter(aes(x = input$stat_dropdown,y = BODYFAT, color = input$stat_dropdown, size = BODYFAT))
+})
+  }
+
+shinyApp(ui = ui, server = server)
+```
+
+
+```{r EXAMPLE FROM GOOGLE}
+### EXAMPLE FROM GOOGLE
+library(shiny)
+library(shinythemes)
+
+ui <- 
+  navbarPage("Demo", collapsible = TRUE, inverse = TRUE, theme = shinytheme("spacelab"),
+             tabPanel("Participation"),
+             tabPanel("Service Use",
+                      fluidPage(
+                        tabsetPanel(
+                          tabPanel("Accessing Website"),
+                          tabPanel("Visiting Library"),
+                          tabPanel("Attending Workshops"),
+                          tabPanel("Exploring Technology")
+                        ))),
+             tabPanel("Space & Study Habits",
+                      fluidPage(
+                        tabsetPanel(
+                          tabPanel("Study Habit"),
+                          tabPanel("Space Preference - Mid & Final Terms"),
+                          tabPanel("Space Preference - Most Days"),
+                          tabPanel("Space Preference - Student Submissions")
+                        ))), 
+             tabPanel("Outreach"),
+             tabPanel("About")
+)
+
+server <- function(input, output) {}
+
+shinyApp(ui = ui, server = server)
 ```
