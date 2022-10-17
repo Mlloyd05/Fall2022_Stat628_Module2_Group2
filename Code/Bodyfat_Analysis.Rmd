@@ -8,8 +8,8 @@ output: html_document
 ```{r setup, include=FALSE}
 library(car)
 #setWD for wherever bodyfat csv is on machine 
-setwd("~/Desktop/UW-Madison/Stat 628/Module 2 Starter Materials")
-body_fat <- read.csv("adjusted_bodyfat.csv")
+#setwd("~/Desktop/UW-Madison/Stat 628/Module 2 Starter Materials")
+body_fat <- read.csv('../Data/adjusted_bodyfat.csv')
 #convert to KGs
 body_fat$WEIGHT <- (body_fat$WEIGHT/2.2)
 #convert to CMs
