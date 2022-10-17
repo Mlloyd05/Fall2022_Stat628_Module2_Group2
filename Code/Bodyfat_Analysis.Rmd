@@ -1,15 +1,17 @@
 ---
 title: "Body Fat Analysis"
-author: "Marwan Lloyd"
+author: "Marwan Lloyd, Shuwei Liu, David Gao"
 date: '2022-10-07'
 output: html_document
+runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
 library(car)
+library(ggplot2)
 #setWD for wherever bodyfat csv is on machine 
 #setwd("~/Desktop/UW-Madison/Stat 628/Module 2 Starter Materials")
-body_fat <- read.csv('../Data/adjusted_bodyfat.csv')
+body_fat <- read.csv('adjusted_bodyfat.csv')
 ```
 Stepwise Part
 
@@ -95,9 +97,6 @@ predictors<-body_fat[3:16]
 From our intuition, one's circumferences of different body parts will increase together when becoming fatter. So there may be strong correlation between our predictors. Thus, we can consider the principal component regression.
 
 From the picture, we can check the correlation between our predictors.
-```{r}
-#pairs(predictors)
-```
 
 ```{r}
 kmo(predictors)
@@ -110,10 +109,6 @@ pred<-predictors[c(2,4:11)]
 pcr_results<-prcomp(pred)
 ```
 
-```{r}
-#new precditors
-#pcr_results$x
-```
 
 ```{r}
 body_fat_pcr<-cbind(body_fat$BODYFAT,predictors$AGE,predictors$HEIGHT,pcr_results$x)
@@ -138,25 +133,30 @@ sort(unique(body_fat$BODYFAT)) # <- from this we see some body fat numbers make 
 
 ```{r}
 #remove ID column remove density column, and remove adiposity as that's weight/height and keeping it could lead to multicollinearity issues
-adjusted_body_fat <- body_fat[c(1,3,4,5,7:16)]
-adjusted_body_fat_lm <- lm(adjusted_body_fat$BODYFAT ~ . , adjusted_body_fat)
-summary(adjusted_body_fat_lm)
+body_fat_lm <- lm(body_fat$BODYFAT ~ . , body_fat)
+summary(body_fat_lm)
+#Check the residual plot to see if it is a good fit
+res.full = resid(body_fat_lm)
+plot(body_fat$BODYFAT,res.full, ylab = "Residuals", xlab = "Bodyfat",main = "Residual plot for full model")
+#turns out not a good fit, overfitting
 ```
 
 ```{r}
 #Get VIF's
 # VIFs start at 1 and have no upper limit. A value of 1 indicates that there is no correlation between this independent variable and any others. VIFs between 1 and 5 suggest that there is a moderate correlation, but it is not severe enough to warrant corrective measures. VIFs greater than 5 represent critical levels of multicollinearity where the coefficients are poorly estimated, and the p-values are questionable.
-
-vif(adjusted_body_fat_lm)
+vif(body_fat_lm)
 ```
 
 ```{r}
 #remove high p-value variables (higher than .2)
 #so  remove height, chest, knee, ankle, biceps
 #remaining variables are: age, weight, neck, abdomen, hip, thigh, forearm, wrist
-bf_2 <- adjusted_body_fat[c(1:3,5,7,8,9,13,14)]
+bf_2 <- body_fat[c(1,3,4,7,9,10,11,15,16)]
 fit_2 <- lm(BODYFAT ~ . , bf_2)
 summary(fit_2)
+#check the residual plot, turns out a better fit
+res.full.drop = resid(fit_2)
+plot(bf_2$BODYFAT,res.full.drop, ylab = "Residuals", xlab = "Bodyfat",main = "Residual plot for full model after dropping")
 ```
 
 ```{r}
@@ -164,18 +164,27 @@ summary(fit_2)
 #for simplicity this model is good as it's only 3 variables that are easy to get 
 #Is better than just Age + Weight as it's R^2 is .3 higher 
 #R^2 is only .02 less than fit_2's R^2
-summary(lm(BODYFAT ~ AGE + WEIGHT + ABDOMEN, bf_2))
+proposinglm <- lm(BODYFAT ~ AGE + WEIGHT + ABDOMEN, bf_2)
+summary(proposinglm)
+res.proposing = resid(proposinglm)
+plot(bf_2$BODYFAT,res.proposing, ylab = "Residuals", xlab = "Bodyfat",main = "Residual plot for proposing model after dropping")
 ```
 
 ```{r}
 #proposing model 2 
 #simpler but loses a lot of accuracy by missing one variable
-summary(lm(BODYFAT ~ AGE + WEIGHT, bf_2))
+proposinglm1 <- lm(BODYFAT ~ AGE + WEIGHT, bf_2)
+summary(proposinglm1)
+res.proposing1 = resid(proposinglm1)
+plot(bf_2$BODYFAT,res.proposing1, ylab = "Residuals", xlab = "Bodyfat",main = "Residual plot for second proposing model after dropping")
 ```
 
 ```{r}
 #Model w/ 3 most statistically significant values but is less accurate than Age + weight + abdomen
-summary(lm(BODYFAT ~ FOREARM + WRIST + ABDOMEN, body_fat))
+proposinglm2 <- lm(BODYFAT ~ FOREARM + WRIST + ABDOMEN, body_fat)
+summary(proposinglm2)
+res.proposing2 = resid(proposinglm2)
+plot(bf_2$BODYFAT,res.proposing2, ylab = "Residuals", xlab = "Bodyfat",main = "Residual plot for 3 predictors model after dropping")
 ```
 
 ```{r}
@@ -183,7 +192,10 @@ summary(lm(BODYFAT ~ FOREARM + WRIST + ABDOMEN, body_fat))
 #Seems like best
 #highest R^2 of proposed ones w/ .7187 
 #lower standard error than AGE + WEIGHT + ABDOMEN
-summary(lm(BODYFAT ~ WEIGHT + ABDOMEN, body_fat))
+proposinglm3 <- lm(BODYFAT ~ WEIGHT + ABDOMEN, body_fat)
+summary(proposinglm3)
+res.proposing3 = resid(proposinglm3)
+plot(bf_2$BODYFAT,res.proposing3, ylab = "Residuals", xlab = "Bodyfat",main = "Residual plot for 2 predictors model after dropping")
 ```
 
 
@@ -193,7 +205,6 @@ ui <- fluidPage(
 selectInput("stat_dropdown", "Select a Stat of interest", choices = colnames(body_fat)[3:17], multiple = FALSE),
 plotOutput("general_scatter")
 )
-
 server <- function(input, output) { 
   output$general_scatter <-  renderPlot({ 
   ggplot(body_fat,aes(input$stat_dropdown,BODYFAT)) + 
@@ -201,9 +212,7 @@ server <- function(input, output) {
      geom_jitter(aes(x = input$stat_dropdown,y = BODYFAT, color = input$stat_dropdown, size = BODYFAT))
 })
   }
-
 app <- shinyApp(ui, server)
-
 app
 ```
 
@@ -211,7 +220,6 @@ app
 ```{r REAL TRY}
 library(shiny)
 library(shinythemes)
-
 ui <- 
   navbarPage("Group 2 Shiny", collapsible = TRUE, inverse = TRUE, theme = shinytheme("spacelab"),
 #             tabPanel("All Stat Scatterplots",
@@ -220,7 +228,7 @@ ui <-
 #                      plotOutput("general_scatter")
 #                      )),
              tabPanel("Model Calculator",
-                      tags$p("The model that our project decided to use was a multi-linear regression of bodyfat percentage on two variables: weight and abdomen circumfrence. The final equation (used in this calculator) determined for this regression was:"), tags$h3("Body Fat % = -40.47 - .67*Weight + .91 * Abdomen"), tags$h4("---------------------------------------------------------"),
+                      tags$p("The model that our project decided to use was a multi-linear regression of bodyfat percentage on two variables: weight and abdomen circumfrence. The final equation (used in this calculator) determined for this regression was:"), tags$h3("Body Fat % = -40.47 - .31*Weight + .91 * Abdomen"), tags$h4("---------------------------------------------------------"),
                       sidebarLayout(sidebarPanel(numericInput("Weight", "Weight (in kg):", 0, min = 0, step = .01), numericInput("Abdomen", "Abdomen Circumfrence (in cm):", 0, min = 0, step = .01)),
                         mainPanel("Calculated Bodyfat:", textOutput("calculated_bodyfat"), tags$head(tags$style("#calculated_bodyfat{color: black;
                                  font-size: 20px;
@@ -231,7 +239,6 @@ ui <-
                       ),
              tabPanel("About", tags$p("This shiny app is maintained by Marwan Lloyd '23. For any questions, concerns, or feedback please reach out him at either of the below emails:"), tags$address("Marwan.Lloyd@Wisc.edu"), tags$address("Melloyd2@Wisc.edu"))
 )
-
 server <- function(input, output) { 
   
   observeEvent(input$Weight,{
@@ -250,7 +257,7 @@ server <- function(input, output) {
     }
     updateNumericInput(getDefaultReactiveDomain(), "Abdomen", value = round(y,digits = 2))})
   
-  output$calculated_bodyfat <- renderText(paste(c(round(-40.47 - .673*input$Weight + .91 * input$Abdomen,2)),"%"))
+  output$calculated_bodyfat <- renderText(paste(c(round(-40.47 - .31*input$Weight + .91 * input$Abdomen,2)),"%"))
   
   output$general_scatter <-  renderPlot({ 
   ggplot(body_fat,aes(input$stat_dropdown,BODYFAT)) + 
@@ -258,8 +265,5 @@ server <- function(input, output) {
      geom_jitter(aes(x = input$stat_dropdown,y = BODYFAT, color = input$stat_dropdown, size = BODYFAT))
 })
   }
-
 shinyApp(ui = ui, server = server)
 ```
-
-
