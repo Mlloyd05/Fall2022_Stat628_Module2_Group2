@@ -138,8 +138,7 @@ sort(unique(body_fat$BODYFAT)) # <- from this we see some body fat numbers make 
 
 ```{r}
 #remove ID column remove density column, and remove adiposity as that's weight/height and keeping it could lead to multicollinearity issues
-adjusted_body_fat <- body_fat[c(2,4,5,6,8:17),]
-
+adjusted_body_fat <- body_fat[c(1,3,4,5,7:16)]
 adjusted_body_fat_lm <- lm(adjusted_body_fat$BODYFAT ~ . , adjusted_body_fat)
 summary(adjusted_body_fat_lm)
 ```
