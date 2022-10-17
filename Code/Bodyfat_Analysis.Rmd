@@ -11,7 +11,7 @@ library(car)
 library(ggplot2)
 #setWD for wherever bodyfat csv is on machine 
 #setwd("~/Desktop/UW-Madison/Stat 628/Module 2 Starter Materials")
-body_fat <- read.csv('adjusted_bodyfat.csv')
+body_fat <- read.csv('../Data/adjusted_bodyfat.csv')
 ```
 Stepwise Part
 
@@ -199,25 +199,7 @@ plot(bf_2$BODYFAT,res.proposing3, ylab = "Residuals", xlab = "Bodyfat",main = "R
 ```
 
 
-```{r FIRST GO}
-library(shiny)
-ui <- fluidPage(
-selectInput("stat_dropdown", "Select a Stat of interest", choices = colnames(body_fat)[3:17], multiple = FALSE),
-plotOutput("general_scatter")
-)
-server <- function(input, output) { 
-  output$general_scatter <-  renderPlot({ 
-  ggplot(body_fat,aes(input$stat_dropdown,BODYFAT)) + 
-      labs(x = input$stat_dropdown, y = "Body Fat", title = "Body Fat Scatterplot") +
-     geom_jitter(aes(x = input$stat_dropdown,y = BODYFAT, color = input$stat_dropdown, size = BODYFAT))
-})
-  }
-app <- shinyApp(ui, server)
-app
-```
-
-
-```{r REAL TRY}
+```{r SHINY APP}
 library(shiny)
 library(shinythemes)
 ui <- 
