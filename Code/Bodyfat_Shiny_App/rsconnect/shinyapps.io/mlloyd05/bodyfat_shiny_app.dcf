@@ -1,0 +1,11 @@
+name: bodyfat_shiny_app
+title:
+username:
+account: mlloyd05
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 7335435
+bundleId: 6413057
+url: https://mlloyd05.shinyapps.io/bodyfat_shiny_app/
+when: 1666052072.18507
+lastSyncTime: 1666052072.18513

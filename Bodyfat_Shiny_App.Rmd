@@ -1,0 +1,61 @@
+---
+title: "Bodyfat Shiny App"
+author: "Marwan Lloyd"
+date: '2022-10-07'
+output: html_document
+---
+
+```{r SHINY APP}
+library(shiny)
+library(shinythemes)
+library(rsconnect)
+
+ui <- 
+  navbarPage("Group 2 Shiny", collapsible = TRUE, inverse = TRUE, theme = shinytheme("spacelab"),
+             #             tabPanel("All Stat Scatterplots",
+             #                      fluidPage(
+             #                      selectInput("stat_dropdown", "Select a Stat of Interest", #choices = colnames(body_fat)[3:17], multiple = FALSE),
+             #                      plotOutput("general_scatter")
+             #                      )),
+             tabPanel("Model Calculator",
+                      tags$p("The model that our project decided to use was a multi-linear regression of body fat percentage on two variables: weight and abdomen circumfrence. The final equation (used in this calculator) determined for this regression was:"), tags$h3("Body Fat % = -40.47 - .31*Weight + .91 * Abdomen"), tags$h4("---------------------------------------------------------"),
+                      sidebarLayout(sidebarPanel(numericInput("Weight", "Weight (in kg):", 0, min = 0, step = .01), numericInput("Abdomen", "Abdomen Circumfrence (in cm):", 0, min = 0, step = .01)),
+                                    mainPanel("Calculated Bodyfat:", textOutput("calculated_bodyfat"), tags$head(tags$style("#calculated_bodyfat{color: black;
+                                 font-size: 20px;
+                                 font-style: bold;
+                                 }"
+                                    )
+                                    )))
+             ),
+             tabPanel("About", tags$p("This shiny app is maintained by Marwan Lloyd '23. For any questions, concerns, or feedback please reach out him at either of the below emails:"), tags$address("Marwan.Lloyd@Wisc.edu"), tags$address("Melloyd2@Wisc.edu"))
+  )
+
+server <- function(input, output) { 
+  
+  observeEvent(input$Weight,{
+    if(input$Weight < 0 || isTRUE(is.na(input$Weight)) ){ 
+      x <- 0}
+    else{
+      x <- input$Weight
+    }
+    updateNumericInput(getDefaultReactiveDomain(), "Weight", value = round(x,digits = 2))})
+  
+  observeEvent(input$Abdomen,{
+    if(input$Abdomen < 0 || isTRUE(is.na(input$Abdomen)) ){ 
+      y <- 0}
+    else{
+      y <- input$Abdomen
+    }
+    updateNumericInput(getDefaultReactiveDomain(), "Abdomen", value = round(y,digits = 2))})
+  
+  output$calculated_bodyfat <- renderText(paste(c(round(-40.47 - .31*input$Weight + .91 * input$Abdomen,2)),"%"))
+  
+  output$general_scatter <-  renderPlot({ 
+    ggplot(body_fat,aes(input$stat_dropdown,BODYFAT)) + 
+      labs(x = input$stat_dropdown, y = "Body Fat", title = "Body Fat Scatterplot") +
+      geom_jitter(aes(x = input$stat_dropdown,y = BODYFAT, color = input$stat_dropdown, size = BODYFAT))
+  })
+}
+
+shinyApp(ui = ui, server = server)
+```
