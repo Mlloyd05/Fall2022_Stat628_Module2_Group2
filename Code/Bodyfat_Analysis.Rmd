@@ -209,6 +209,12 @@ qqnorm(rstandard(proposinglm3),pch=19,cex=0.8,cex.lab=1.2,cex.main=1.5,
 abline(a=0,b=1,col="black",lwd=2)
 ```
 
+```{r}
+#Collinearity Check
+ggplot(adjusted_body_fat, mapping = aes(x = WEIGHT, y = ABDOMEN))+geom_point()
+vif(proposinglm3)
+```
+
 ```{r SHINY APP}
 library(shiny)
 library(shinythemes)
