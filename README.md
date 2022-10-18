@@ -14,3 +14,7 @@ Link to our Shiny App: [Calculator](https://mlloyd05.shinyapps.io/bodyfat_shiny_
 This folder contains all the visualizations we used in our study, including the images used in executive summary and Powerpoint Slides.
 #Module 2 Starter Materials and Misc
 These folders are not tied to module 2 submission 
+#Bodyfat Group2.pptx
+Our powerpoint presentation for Module 2
+#Module2Stat628Group2.pdf
+Our 2 page executive summary for Module 2
