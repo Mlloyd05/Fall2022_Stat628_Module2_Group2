@@ -9,5 +9,5 @@ Link to our Shiny App: [Calculator](https://mlloyd05.shinyapps.io/bodyfat_shiny_
 # Data
 - BodyFat.csv is the original data that contains 252 observations and 16 varibles(excluding the id number).
 - adjusted_bodyfat.csv is the data we used after data cleaning, two body fat outliers were removed and one observation's height was corrected.
-# Image
-This is all the visualizations we get.
+# Images
+This is all the visualizations we used in our study, including the images used in executive summary and Powerpoint Slides.
