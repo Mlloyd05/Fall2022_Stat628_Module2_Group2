@@ -211,7 +211,7 @@ abline(a=0,b=1,col="black",lwd=2)
 
 ```{r}
 #Collinearity Check
-ggplot(adjusted_body_fat, mapping = aes(x = WEIGHT, y = ABDOMEN))+geom_point()
+ggplot(adjusted_body_fat, mapping = aes(x = ABDOMEN, y = WEIGHT))+geom_point()
 vif(proposinglm3)
 ```
 
