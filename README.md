@@ -2,7 +2,7 @@
 ## Group 2: Marwan Lloyd, Shuwei Liu, David Gao
 This is a project aiming to build a simpl, robust and accurate model for determining the body fat percentage of users, after using PCA, PCA stepwise selection and  simple linear regression, we found that body fat is highly correlated to weight and abdomen.
 
-Link to our Shiny App: [put link here](https://mlloyd05.shinyapps.io/bodyfat_shiny_app/)
+Link to our Shiny App: [Calculator](https://mlloyd05.shinyapps.io/bodyfat_shiny_app/)
 # Code
 - preprocessing.R is the code we used to cleaning data.
 - Bodyfat_Analysis.Rmd is the overall code for our study, including model selection, model visualization and Shiny App.
